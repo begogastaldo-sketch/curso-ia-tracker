@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracker Curso IA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Questrial&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green: #1D9E75;
+      --green-light: #E1F5EE;
+      --green-mid: #5DCAA5;
+      --green-dark: #0F6E56;
+      --green-deep: #085041;
+      --amber: #BA7517;
+      --amber-light: #FAEEDA;
+      --coral: #D85A30;
+      --navy: #1a2744;
+      --text: #1a1a1a;
+      --text-2: #555;
+      --text-3: #888;
+      --border: rgba(0,0,0,0.1);
+      --border-2: rgba(0,0,0,0.18);
+      --bg: #f7f6f2;
+      --bg-card: #ffffff;
+      --bg-2: #f0efe9;
+      --radius: 10px;
+      --radius-lg: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Questrial', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    header {
+      background: var(--navy);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: #fff;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+    }
+    header .subtitle {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 2px;
+    }
+    .header-badge {
+      background: var(--green);
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 400;
+    }
+
+    .tabs {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 2rem;
+      gap: 0;
+    }
+    .tab {
+      padding: 14px 22px;
+      font-size: 13px;
+      font-family: 'Questrial', sans-serif;
+      color: var(--text-3);
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--green-dark); border-bottom-color: var(--green); }
+
+    .main { max-width: 820px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* PROGRESS */
+    .progress-wrap { margin-bottom: 1.75rem; }
+    .progress-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-2); margin-bottom: 8px; }
+    .progress-bar { height: 7px; background: var(--bg-2); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--green-mid)); border-radius: 4px; transition: width 0.5s ease; }
+
+    /* MODULE CARDS */
+    .module-list { display: flex; flex-direction: column; gap: 10px; }
+    .module-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: border-color 0.15s;
+    }
+    .module-card:hover { border-color: var(--border-2); }
+    .module-card.current { border: 2px solid var(--green); background: var(--green-light); }
+    .module-card.done .mod-title { text-decoration: line-through; opacity: 0.6; }
+    .mod-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0;
+      background: var(--bg-2); color: var(--text-3);
+    }
+    .module-card.current .mod-num { background: var(--green); color: #fff; }
+    .module-card.done .mod-num { background: #9FE1CB; color: var(--green-deep); }
+    .mod-info { flex: 1; min-width: 0; }
+    .mod-title { font-size: 14px; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mod-sub { font-size: 12px; color: var(--text-3); }
+    .badge {
+      font-size: 11px; padding: 3px 11px; border-radius: 20px; flex-shrink: 0;
+    }
+    .badge-current { background: var(--green); color: #fff; }
+    .badge-done { background: #9FE1CB; color: var(--green-deep); }
+    .badge-pending { background: var(--bg-2); color: var(--text-3); }
+    .btn-sm {
+      font-size: 12px; padding: 5px 13px; border-radius: var(--radius);
+      border: 1px solid var(--border-2); background: transparent;
+      color: var(--text-2); cursor: pointer; font-family: 'Questrial', sans-serif;
+      flex-shrink: 0; transition: background 0.12s;
+    }
+    .btn-sm:hover { background: var(--bg-2); }
+    .btn-sm.danger { color: #c0392b; border-color: #e0b0b0; }
+    .btn-sm.danger:hover { background: #fdecea; }
+    .btn-sm.green { color: var(--green-dark); border-color: var(--green); }
+    .btn-sm.green:hover { background: var(--green-light); }
+
+    .toolbar { display: flex; justify-content: flex-end; margin-top: 1rem; }
+
+    /* STATS */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.75rem; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
+    .stat-label { font-size: 12px; color: var(--text-3); margin-bottom: 5px; }
+    .stat-value { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--text); }
+    .stat-unit { font-family: 'Questrial', sans-serif; font-size: 14px; color: var(--text-3); }
+
+    /* SESSION FORM */
+    .form-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.25rem;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; }
+    .form-group input, .form-group select, .form-group textarea {
+      font-size: 13px; font-family: 'Questrial', sans-serif;
+      border: 1px solid var(--border-2); border-radius: var(--radius);
+      padding: 8px 11px; background: var(--bg); color: var(--text);
+      outline: none; transition: border-color 0.12s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--green); }
+    .form-group textarea { height: 90px; resize: vertical; }
+    .form-full { grid-column: 1 / -1; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+    .btn-primary {
+      padding: 8px 20px; border-radius: var(--radius); border: none;
+      background: var(--green); color: #fff; font-size: 13px;
+      font-family: 'Questrial', sans-serif; cursor: pointer; transition: background 0.12s;
+    }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-cancel {
+      padding: 8px 16px; border-radius: var(--radius);
+      border: 1px solid var(--border-2); background: transparent;
+      color: var(--text-2); font-size: 13px; font-family: 'Questrial', sans-serif; cursor: pointer;
+    }
+    .btn-cancel:hover { background: var(--bg-2); }
+
+    .session-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .session-toolbar span { font-size: 13px; color: var(--text-3); }
+    .toggle-btn {
+      font-size: 13px; padding: 7px 18px; border-radius: var(--radius);
+      border: 1px solid var(--green); color: var(--green-dark);
+      background: transparent; cursor: pointer; font-family: 'Questrial', sans-serif;
+      transition: background 0.12s;
+    }
+    .toggle-btn:hover { background: var(--green-light); }
+
+    /* SESSION CARDS */
+    .session-list { display: flex; flex-direction: column; gap: 10px; }
+    .session-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.1rem 1.25rem;
+    }
+    .session-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+    .session-num { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; }
+    .session-date { font-size: 13px; color: var(--text-2); }
+    .session-hours { margin-left: auto; font-size: 13px; font-weight: 600; background: var(--green-light); color: var(--green-dark); padding: 3px 11px; border-radius: 20px; }
+    .session-module-tag { font-size: 11px; background: var(--bg-2); color: var(--text-2); padding: 3px 9px; border-radius: 20px; }
+    .session-group { font-size: 12px; color: var(--text-3); margin-bottom: 6px; }
+    .session-content { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+    .session-foot { display: flex; justify-content: flex-end; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-3); font-size: 14px; line-height: 1.7; }
+
+    /* CALENDAR */
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .cal-nav { display: flex; align-items: center; gap: 10px; }
+    .cal-month-label { font-family: 'DM Serif Display', serif; font-size: 1.15rem; color: var(--text); }
+    .nav-btn {
+      width: 32px; height: 32px; border: 1px solid var(--border-2); border-radius: var(--radius);
+      background: var(--bg-card); cursor: pointer; font-size: 16px; color: var(--text-2);
+      display: flex; align-items: center; justify-content: center; transition: background 0.12s;
+    }
+    .nav-btn:hover { background: var(--bg-2); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .cal-day-header { text-align: center; font-size: 11px; color: var(--text-3); padding: 5px 0; text-transform: uppercase; letter-spacing: 0.04em; }
+    .cal-day {
+      min-height: 64px; border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 6px; cursor: pointer; background: var(--bg-card); transition: border-color 0.12s;
+    }
+    .cal-day:hover { border-color: var(--border-2); }
+    .cal-day.other-month { opacity: 0.28; }
+    .cal-day.today { border-color: var(--green); }
+    .cal-day.has-event { background: var(--green-light); }
+    .day-num { font-size: 12px; color: var(--text-3); font-weight: 600; }
+    .cal-day.today .day-num { color: var(--green-dark); }
+    .ev-pill { font-size: 10px; margin-top: 3px; line-height: 1.3; color: var(--green-dark); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ev-pill.amber { color: var(--amber); }
+    .ev-pill.coral { color: var(--coral); }
+    .legend { display: flex; gap: 16px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3); }
+    .ldot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal {
+      background: var(--bg-card); border-radius: var(--radius-lg);
+      border: 1px solid var(--border-2); padding: 1.5rem; width: 380px;
+      max-width: 95vw; max-height: 90vh; overflow-y: auto;
+    }
+    .modal h3 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-weight: 400; margin-bottom: 14px; }
+    .modal input, .modal select, .modal textarea {
+      width: 100%; margin-bottom: 10px; font-size: 13px;
+      font-family: 'Questrial', sans-serif; border: 1px solid var(--border-2);
+      border-radius: var(--radius); padding: 8px 11px;
+      background: var(--bg); color: var(--text); outline: none;
+    }
+    .modal input:focus, .modal select:focus, .modal textarea:focus { border-color: var(--green); }
+    .modal textarea { height: 80px; resize: vertical; }
+    .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+    .modal-event-list { margin-bottom: 12px; }
+    .modal-event-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .modal-event-item:last-child { border-bottom: none; }
+    .modal-event-title { flex: 1; }
+    .modal-event-title strong { display: block; font-size: 13px; margin-bottom: 1px; }
+    .modal-event-note { font-size: 12px; color: var(--text-3); }
+    .modal-event-del { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 15px; line-height: 1; }
+    .modal-event-del:hover { color: #c0392b; }
+    .section-sep { border-top: 1px solid var(--border); margin: 12px 0; padding-top: 12px; }
+    .section-sep-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr; }
+      header { padding: 1rem; }
+      .main { padding: 1rem; }
+      .tabs { padding: 0 1rem; }
+      .tab { padding: 12px 14px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Tracker Curso IA</h1>
+    <div class="subtitle">Seguimiento de temario, sesiones y calendario</div>
+  </div>
+  <span class="header-badge" id="hdr-badge">0% completado</span>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('temario')">Temario</button>
+  <button class="tab" onclick="showTab('sesiones')">Registro de sesiones</button>
+  <button class="tab" onclick="showTab('calendario')">Calendario</button>
+</div>
+
+<div class="main">
+
+  <!-- TEMARIO -->
+  <div id="panel-temario" class="panel active">
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="prog-text">Cargando...</span>
+        <span id="prog-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="module-list" id="module-list"></div>
+    <div class="toolbar">
+      <button class="btn-sm green" onclick="openModal('add-module')">+ Añadir módulo</button>
+    </div>
+  </div>
+
+  <!-- SESIONES -->
+  <div id="panel-sesiones" class="panel">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total sesiones</div><div class="stat-value" id="s-total">0</div></div>
+      <div class="stat-card"><div class="stat-label">Horas impartidas</div><div class="stat-value" id="s-horas">0 <span class="stat-unit">h</span></div></div>
+      <div class="stat-card"><div class="stat-label">Última sesión</div><div class="stat-value" id="s-ultima" style="font-size:16px;padding-top:6px;">—</div></div>
+    </div>
+
+    <div class="session-toolbar">
+      <span id="session-count-label">Sin sesiones registradas</span>
+      <button class="toggle-btn" id="toggle-btn" onclick="toggleForm()">+ Nueva sesión</button>
+    </div>
+
+    <div id="session-form" style="display:none;">
+      <div class="form-card">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Fecha</label>
+            <input type="date" id="sf-date" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Horas impartidas</label>
+            <input type="number" id="sf-hours" min="0.5" max="12" step="0.5" placeholder="ej: 3" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Módulo</label>
+            <select id="sf-module"><option value="">Sin módulo específico</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Institución / Grupo</label>
+            <input type="text" id="sf-group" placeholder="ej: EOI Valencia" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group form-full">
+            <label class="form-label">Contenido impartido</label>
+            <textarea id="sf-content" placeholder="Describe qué se trabajó en esta sesión..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel" onclick="toggleForm()">Cancelar</button>
+          <button class="btn-primary" onclick="addSession()">Guardar sesión</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="session-list" id="session-list"></div>
+  </div>
+
+  <!-- CALENDARIO -->
+  <div id="panel-calendario" class="panel">
+    <div class="legend">
+      <div class="legend-item"><div class="ldot" style="background:var(--green)"></div> Sesión</div>
+      <div class="legend-item"><div class="ldot" style="background:var(--amber)"></div> Preparar</div>
+      <div class="legend-item"><div class="ldot" style="background:var(--coral)"></div> Entrega</div>
+    </div>
+    <div class="cal-header">
+      <div class="cal-nav">
+        <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+        <span class="cal-month-label" id="cal-month-label"></span>
+        <button class="nav-btn" onclick="changeMonth(1)">›</button>
+      </div>
+      <button class="btn-sm green" onclick="openAddEventModal(null)">+ Añadir tarea</button>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-day-header">Lu</div><div class="cal-day-header">Ma</div>
+      <div class="cal-day-header">Mi</div><div class="cal-day-header">Ju</div>
+      <div class="cal-day-header">Vi</div><div class="cal-day-header">Sá</div>
+      <div class="cal-day-header">Do</div>
+    </div>
+    <div class="cal-grid" id="cal-grid" style="margin-top:5px;"></div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" style="display:none;" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal-body"></div>
+</div>
+
+<script>
+  const MKEY = 'cia_modules';
+  const EKEY = 'cia_events';
+  const SKEY = 'cia_sessions';
+
+  let modules = JSON.parse(localStorage.getItem(MKEY) || 'null') || [
+    {id:1, title:'Introducción a la IA', sub:'Conceptos básicos, herramientas y ecosistema', status:'done'},
+    {id:2, title:'Prompting y modelos de lenguaje', sub:'Técnicas de prompting, ChatGPT, Claude, Gemini', status:'done'},
+    {id:3, title:'NotebookLM y análisis de documentos', sub:'Subida de fuentes, preguntas, síntesis', status:'current'},
+    {id:4, title:'Automatización con Google Sheets', sub:'Apps Script, fórmulas con IA, plantillas', status:'pending'},
+    {id:5, title:'GEO y contenidos con IA', sub:'Generación de contenido optimizado para buscadores IA', status:'pending'},
+    {id:6, title:'Casos prácticos por sector', sub:'Retail, hostelería, autónomos, servicios', status:'pending'},
+  ];
+  let events = JSON.parse(localStorage.getItem(EKEY) || '[]');
+  let sessions = JSON.parse(localStorage.getItem(SKEY) || '[]');
+  let calYear = new Date().getFullYear();
+  let calMonth = new Date().getMonth();
+  let nextModId = modules.reduce((m, x) => Math.max(m, x.id), 0) + 1;
+
+  function save() {
+    localStorage.setItem(MKEY, JSON.stringify(modules));
+    localStorage.setItem(EKEY, JSON.stringify(events));
+    localStorage.setItem(SKEY, JSON.stringify(sessions));
+  }
+
+  // ── TABS ──
+  function showTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.tab[onclick="showTab('${tab}')"]`).classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+    if (tab === 'temario') renderModules();
+    if (tab === 'sesiones') renderSessions();
+    if (tab === 'calendario') renderCal();
+  }
+
+  // ── MÓDULOS ──
+  function renderModules() {
+    const list = document.getElementById('module-list');
+    const done = modules.filter(m => m.status === 'done').length;
+    const pct = modules.length ? Math.round(done / modules.length * 100) : 0;
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = pct + '%';
+    document.getElementById('prog-text').textContent = `${done} de ${modules.length} módulos completados`;
+    document.getElementById('hdr-badge').textContent = pct + '% completado';
+    list.innerHTML = '';
+    modules.forEach((m, i) => {
+      const bc = m.status === 'current' ? 'badge-current' : m.status === 'done' ? 'badge-done' : 'badge-pending';
+      const bl = m.status === 'current' ? 'En curso' : m.status === 'done' ? 'Completado' : 'Pendiente';
+      const ab = m.status === 'pending' ? 'Iniciar' : m.status === 'current' ? 'Completar' : 'Reabrir';
+      const card = document.createElement('div');
+      card.className = 'module-card ' + m.status;
+      card.innerHTML = `
+        <div class="mod-num">${i + 1}</div>
+        <div class="mod-info">
+          <div class="mod-title">${m.title}</div>
+          <div class="mod-sub">${m.sub || ''}</div>
+        </div>
+        <span class="badge ${bc}">${bl}</span>
+        <button class="btn-sm" onclick="cycleStatus(${m.id})">${ab}</button>
+        <button class="btn-sm danger" onclick="deleteModule(${m.id})">✕</button>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function cycleStatus(id) {
+    const m = modules.find(x => x.id === id);
+    if (!m) return;
+    if (m.status === 'pending') {
+      modules.forEach(x => { if (x.status === 'current') x.status = 'pending'; });
+      m.status = 'current';
+    } else if (m.status === 'current') {
+      m.status = 'done';
+      const nx = modules[modules.indexOf(m) + 1];
+      if (nx && nx.status === 'pending') nx.status = 'current';
+    } else {
+      m.status = 'pending';
+    }
+    save(); renderModules();
+  }
+
+  function deleteModule(id) {
+    if (!confirm('¿Eliminar este módulo?')) return;
+    modules = modules.filter(x => x.id !== id);
+    save(); renderModules();
+  }
+
+  // ── SESIONES ──
+  function toggleForm() {
+    const f = document.getElementById('session-form');
+    const btn = document.getElementById('toggle-btn');
+    const open = f.style.display === 'none';
+    f.style.display = open ? 'block' : 'none';
+    btn.textContent = open ? 'Cancelar' : '+ Nueva sesión';
+    if (open) {
+      const t = new Date();
+      document.getElementById('sf-date').value = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+      document.getElementById('sf-hours').value = '';
+      document.getElementById('sf-content').value = '';
+      document.getElementById('sf-group').value = '';
+      const sel = document.getElementById('sf-module');
+      sel.innerHTML = '<option value="">Sin módulo específico</option>';
+      modules.forEach(m => {
+        const o = document.createElement('option');
+        o.value = m.id; o.textContent = m.title; sel.appendChild(o);
+      });
+    }
+  }
+
+  function addSession() {
+    const date = document.getElementById('sf-date').value;
+    const hours = parseFloat(document.getElementById('sf-hours').value);
+    const content = document.getElementById('sf-content').value.trim();
+    const group = document.getElementById('sf-group').value.trim();
+    const modId = document.getElementById('sf-module').value;
+    if (!date || !hours || !content) { alert('Completa fecha, horas y contenido.'); return; }
+    const modTitle = modId ? (modules.find(m => m.id == modId)?.title || '') : '';
+    sessions.unshift({ id: Date.now() + '', date, hours, content, group, modId, modTitle });
+    save(); toggleForm(); renderSessions();
+  }
+
+  function deleteSession(id) {
+    if (!confirm('¿Eliminar esta sesión?')) return;
+    sessions = sessions.filter(s => s.id !== id);
+    save(); renderSessions();
+  }
+
+  function renderSessions() {
+    const totalH = sessions.reduce((s, x) => s + x.hours, 0);
+    document.getElementById('s-total').textContent = sessions.length;
+    document.getElementById('s-horas').innerHTML = `${totalH} <span class="stat-unit">h</span>`;
+    const sorted = [...sessions].sort((a, b) => b.date.localeCompare(a.date));
+    if (sorted.length) {
+      const d = new Date(sorted[0].date + 'T00:00:00');
+      document.getElementById('s-ultima').textContent = d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    } else {
+      document.getElementById('s-ultima').textContent = '—';
+    }
+    document.getElementById('session-count-label').textContent = sessions.length ? `${sessions.length} sesión${sessions.length > 1 ? 'es' : ''} registrada${sessions.length > 1 ? 's' : ''}` : 'Sin sesiones registradas';
+    const list = document.getElementById('session-list');
+    if (!sessions.length) {
+      list.innerHTML = '<div class="empty-state">Aún no hay sesiones registradas.<br>Pulsa "+ Nueva sesión" para empezar.</div>';
+      return;
+    }
+    list.innerHTML = sorted.map((s, i) => {
+      const d = new Date(s.date + 'T00:00:00');
+      const dl = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      return `<div class="session-card">
+        <div class="session-head">
+          <span class="session-num">Sesión ${sorted.length - i}</span>
+          <span class="session-date">${dl.charAt(0).toUpperCase() + dl.slice(1)}</span>
+          ${s.modTitle ? `<span class="session-module-tag">${s.modTitle}</span>` : ''}
+          <span class="session-hours">${s.hours}h</span>
+        </div>
+        ${s.group ? `<div class="session-group">${s.group}</div>` : ''}
+        <div class="session-content">${s.content}</div>
+        <div class="session-foot">
+          <button class="btn-sm danger" onclick="deleteSession('${s.id}')">Eliminar</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── CALENDARIO ──
+  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  function changeMonth(d) {
+    calMonth += d;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCal();
+  }
+
+  function renderCal() {
+    document.getElementById('cal-month-label').textContent = MONTHS[calMonth] + ' ' + calYear;
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+    let start = new Date(calYear, calMonth, 1).getDay();
+    start = start === 0 ? 6 : start - 1;
+    const dim = new Date(calYear, calMonth + 1, 0).getDate();
+    const dip = new Date(calYear, calMonth, 0).getDate();
+    const today = new Date();
+    const total = Math.ceil((start + dim) / 7) * 7;
+    for (let i = 0; i < total; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-day';
+      let day, m = calMonth, y = calYear, other = false;
+      if (i < start) { day = dip - start + i + 1; m = calMonth - 1; other = true; if (m < 0) { m = 11; y = calYear - 1; } }
+      else if (i >= start + dim) { day = i - start - dim + 1; m = calMonth + 1; other = true; if (m > 11) { m = 0; y = calYear + 1; } }
+      else { day = i - start + 1; }
+      if (other) cell.classList.add('other-month');
+      const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      if (day === today.getDate() && m === today.getMonth() && y === today.getFullYear()) cell.classList.add('today');
+      const de = events.filter(e => e.date === ds);
+      if (de.length) cell.classList.add('has-event');
+      cell.innerHTML = `<div class="day-num">${day}</div>`;
+      de.slice(0, 3).forEach(e => {
+        const p = document.createElement('div');
+        p.className = 'ev-pill' + (e.type === 'prep' ? ' amber' : e.type === 'entrega' ? ' coral' : '');
+        p.textContent = e.title.length > 13 ? e.title.slice(0, 12) + '…' : e.title;
+        cell.appendChild(p);
+      });
+      cell.onclick = () => openDayModal(ds, events.filter(e => e.date === ds));
+      grid.appendChild(cell);
+    }
+  }
+
+  // ── MODALES ──
+  function openModal(type, data) {
+    const body = document.getElementById('modal-body');
+    if (type === 'add-module') {
+      body.innerHTML = `
+        <h3>Nuevo módulo</h3>
+        <input id="nm-title" placeholder="Título del módulo" />
+        <input id="nm-sub" placeholder="Descripción breve (opcional)" />
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+          <button class="btn-primary" onclick="confirmAddModule()">Añadir</button>
+        </div>`;
+    }
+    document.getElementById('modal-overlay').style.display = 'flex';
+  }
+
+  function confirmAddModule() {
+    const title = document.getElementById('nm-title').value.trim();
+    if (!title) { alert('Escribe un título.'); return; }
+    const sub = document.getElementById('nm-sub').value.trim();
+    modules.push({ id: nextModId++, title, sub, status: 'pending' });
+    save(); closeModal(); renderModules();
+  }
+
+  function openDayModal(ds, de) {
+    const d = new Date(ds + 'T00:00:00');
+    const label = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+    const evHtml = de.length ? de.map(e => `
+      <div class="modal-event-item">
+        <div class="ldot" style="background:${e.type==='prep'?'var(--amber)':e.type==='entrega'?'var(--coral)':'var(--green)'};flex-shrink:0;margin-top:4px;"></div>
+        <div class="modal-event-title">
+          <strong>${e.title}</strong>
+          ${e.note ? `<span class="modal-event-note">${e.note}</span>` : ''}
+        </div>
+        <button class="modal-event-del" onclick="deleteEvent('${e.id}','${ds}')">✕</button>
+      </div>`).join('') : '<p style="font-size:13px;color:var(--text-3);padding:6px 0">Sin tareas este día.</p>';
+
+    document.getElementById('modal-body').innerHTML = `
+      <h3>${label.charAt(0).toUpperCase() + label.slice(1)}</h3>
+      <div class="modal-event-list">${evHtml}</div>
+      <div class="section-sep">
+        <div class="section-sep-label">Añadir tarea</div>
+        <input id="ev-title" placeholder="Título de la tarea" />
+        <select id="ev-type">
+          <option value="sesion">Sesión formativa</option>
+          <option value="prep">Preparar material</option>
+          <option value="entrega">Entrega / deadline</option>
+        </select>
+        <textarea id="ev-note" placeholder="Notas (opcional)" style="height:70px;"></textarea>
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="closeModal()">Cerrar</button>
+          <button class="btn-primary" onclick="addEvent('${ds}')">Añadir</button>
+        </div>
+      </div>`;
+    document.getElementById('modal-overlay').style.display = 'flex';
+  }
+
+  function openAddEventModal(ds) {
+    const t = new Date();
+    const def = ds || `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+    document.getElementById('modal-body').innerHTML = `
+      <h3>Nueva tarea</h3>
+      <input id="ev-date" type="date" value="${def}" />
+      <input id="ev-title" placeholder="Título de la tarea" />
+      <select id="ev-type">
+        <option value="sesion">Sesión formativa</option>
+        <option value="prep">Preparar material</option>
+        <option value="entrega">Entrega / deadline</option>
+      </select>
+      <textarea id="ev-note" placeholder="Notas (opcional)" style="height:70px;"></textarea>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="btn-primary" onclick="addEventFromModal()">Añadir</button>
+      </div>`;
+    document.getElementById('modal-overlay').style.display = 'flex';
+  }
+
+  function addEvent(ds) {
+    const title = document.getElementById('ev-title').value.trim();
+    if (!title) { alert('Escribe un título.'); return; }
+    events.push({ id: Date.now() + '', date: ds, title, type: document.getElementById('ev-type').value, note: document.getElementById('ev-note').value.trim() });
+    save(); closeModal(); renderCal();
+  }
+
+  function addEventFromModal() {
+    const ds = document.getElementById('ev-date').value;
+    const title = document.getElementById('ev-title').value.trim();
+    if (!ds || !title) { alert('Completa fecha y título.'); return; }
+    events.push({ id: Date.now() + '', date: ds, title, type: document.getElementById('ev-type').value, note: document.getElementById('ev-note').value.trim() });
+    save(); closeModal(); renderCal();
+  }
+
+  function deleteEvent(id, ds) {
+    events = events.filter(e => e.id !== id);
+    save();
+    openDayModal(ds, events.filter(e => e.date === ds));
+    renderCal();
+  }
+
+  function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+  function handleOverlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+
+  // Init
+  renderModules();
+  renderCal();
+</script>
+</body>
+</html>
